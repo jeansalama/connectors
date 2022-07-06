@@ -37,6 +37,7 @@ module App
       connector_id = App::Config[:connector_package_id]
       config_settings = Framework::ConnectorSettings.fetch(connector_id)
       Framework::ElasticConnectorActions.ensure_index_exists(config_settings[:index_name])
+      Framework::ElasticConnectorActions.ensure_job_index_exists
       Framework::ElasticConnectorActions.force_sync(connector_id)
       App::Connector.start!
     end
