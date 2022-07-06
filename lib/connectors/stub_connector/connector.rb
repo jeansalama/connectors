@@ -32,10 +32,9 @@ module Connectors
       end
 
       def sync(connector)
-        body = [
-          { index: { _index: connector['index_name'], _id: 1, data: { name: 'stub connector' } } }
-        ]
-        Utility::EsClient.bulk(:body => body)
+        super
+        @sink.ingest({ :id => 1, :name => 'stub connector' })
+        @status[:index_document_count] = 1
       end
     end
   end

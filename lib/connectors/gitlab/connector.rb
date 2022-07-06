@@ -45,11 +45,8 @@ module Connectors
         }
       end
 
-      def sync(connector_settings)
-        @sink = Utility::Sink::CombinedSink.new(
-          [Utility::Sink::ConsoleSink.new,
-           Utility::Sink::ElasticSink.new(connector_settings[:index_name])]
-        )
+      def sync(_connector = {})
+        super
         extract_projects
       end
 
@@ -77,6 +74,7 @@ module Connectors
           next_page_link = @extractor.yield_projects_page(next_page_link) do |projects_chunk|
             projects = projects_chunk.map { |p| Connectors::GitLab::Adapter.to_es_document(:project, p) }
             @sink.ingest_multiple(projects)
+            @status[:index_document_count] += projects.count
             extract_project_files(projects_chunk)
           end
           break unless next_page_link.present?
@@ -96,6 +94,7 @@ module Connectors
           files = files.map { |file| Connectors::GitLab::Adapter.to_es_document(:file, file) }
           project[:files] = files
           @sink.ingest_multiple(files)
+          @status[:index_document_count] += files.count
         end
       rescue StandardError => e
         puts(e.message)

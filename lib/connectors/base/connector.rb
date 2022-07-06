@@ -12,27 +12,38 @@ require 'utility/logger'
 module Connectors
   module Base
     class Connector
+      def initialize
+        @status = {
+          :index_document_count => 0,
+          :deleted_document_count => 0,
+          :error => nil
+        }
+      end
+
       def sync_content_and_yield(connector)
-        error = nil
         sync_content(connector)
       rescue StandardError => e
         Utility::Logger.error_with_backtrace(message: "Error happened when syncing #{display_name}", exception: e)
-        error = e.message
+        @status[:error] = e.message
       ensure
-        yield error
+        yield @status.dup
       end
 
       def sync_content(connector)
-        error = nil
         sync(connector)
       rescue StandardError => e
         Utility::Logger.error("Error happened when syncing #{display_name}. Error: #{e.message}")
-        error = e.message
+        @status[:error] = e.message
       ensure
-        yield error
+        yield @status.dup
       end
 
-      def sync(connector); end
+      def sync(connector)
+        @sink = Utility::Sink::CombinedSink.new(
+          [Utility::Sink::ConsoleSink.new,
+           Utility::Sink::ElasticSink.new(connector['index_name'])]
+        )
+      end
 
       def source_status(params = {})
         health_check(params)

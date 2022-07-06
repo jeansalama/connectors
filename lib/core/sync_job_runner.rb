@@ -20,7 +20,7 @@ module Core
   class SyncJobRunner
     def initialize(connector_settings)
       @connector_settings = connector_settings
-      @connector_instance = Connectors::REGISTRY.connector(@connector_settings.service_type)
+      @connector_instance = Connectors::REGISTRY.connector(App::Config['service_type'])
     end
 
     def execute
@@ -29,10 +29,10 @@ module Core
       return unless should_sync?
 
       Utility::Logger.info("Starting to sync for connector #{@connector_settings['_id']}")
-      ElasticConnectorActions.claim_job(@connector_settings.id)
+      job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
 
-      @connector_instance.sync_content(@connector_settings) do |error|
-        ElasticConnectorActions.complete_sync(@connector_settings.id, error)
+      @connector_instance.sync_content(@connector_settings) do |status|
+        ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, status)
       end
     end
 
