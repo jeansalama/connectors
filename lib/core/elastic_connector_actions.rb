@@ -12,7 +12,7 @@ require 'utility'
 module Core
   class ElasticConnectorActions
     CONNECTORS_INDEX = '.elastic-connectors'
-    JOB_INDEX = '.elastic-connectors-sync-logs'
+    JOB_INDEX = '.elastic-connectors-sync-jobs'
 
     def self.force_sync(connector_package_id)
       body = {

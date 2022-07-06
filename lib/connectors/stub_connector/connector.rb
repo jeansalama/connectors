@@ -34,7 +34,7 @@ module Connectors
       def sync(connector)
         super
         @sink.ingest({ :id => 1, :name => 'stub connector' })
-        @status[:index_document_count] = 1
+        @status[:indexed_document_count] = 1
       end
     end
   end

@@ -14,7 +14,7 @@ module Connectors
     class Connector
       def initialize
         @status = {
-          :index_document_count => 0,
+          :indexed_document_count => 0,
           :deleted_document_count => 0,
           :error => nil
         }
